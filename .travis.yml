@@ -9,5 +9,5 @@ env:
     - JAVA_HOME=/usr/lib/jvm/java-8-oracle
 script:
   - jdk_switcher use oraclejdk8
-  - gcc -version
-  - gcc -I"$JAVA_HOME/include/linux" -I"$TRAVIS_BUILD_DIR/Ruskit.Test" -o $TRAVIS_BUILD_DIR/libRuskitSendboxHandler.so -shared -fPIC $TRAVIS_BUILD_DIR/Ruskit.Test/RuskitSendboxHandler.cpp
+  - gcc --version
+  - gcc -I"$JAVA_HOME/include/linux" -I"$JAVA_HOME/include" -I"$TRAVIS_BUILD_DIR/Ruskit.Test" -o $TRAVIS_BUILD_DIR/libRuskitSendboxHandler.so -shared -fPIC $TRAVIS_BUILD_DIR/Ruskit.Test/RuskitSendboxHandler.cpp
