@@ -1,7 +1,4 @@
-package io.github.ruskonert.ruskit.test
-
-import io.github.ruskonert.ruskit.sendbox.ExternalExecutor
-import io.github.ruskonert.ruskit.sendbox.SafetyExecutable
+package io.github.ruskonert.ruskit.sendbox
 
 class RuskitSendboxHandler : ExternalExecutor()
 {
@@ -26,10 +23,6 @@ class RuskitSendboxHandler : ExternalExecutor()
 
         @JvmStatic
         @SafetyExecutable("Ruskit.Test")
-        private external fun Test1(b: Int)
-
-        @JvmStatic
-        @SafetyExecutable("Ruskit.Test")
-        private external fun Test2(c: ByteArray)
+        private external fun PlaySoundA(c: ByteArray)
     }
 }

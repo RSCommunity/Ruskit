@@ -1,0 +1,5 @@
+name: Ruskit
+version: 1.0.0
+main: io.github.ruskonert.ruskit.Ruskit
+author: ruskonert
+description: No description.

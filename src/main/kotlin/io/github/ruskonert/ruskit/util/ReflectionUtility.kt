@@ -6,6 +6,15 @@ import java.lang.reflect.*
 @Suppress("UNCHECKED_CAST")
 object ReflectionUtility
 {
+    @Throws(NoSuchMethodException::class)
+    fun getAnnotationDefaultValue(anno: Class<out Annotation>, fieldName: String): Any
+    {
+        var method: Method? = null
+        method = anno.getDeclaredMethod(fieldName)
+        assert(method != null)
+        return method!!.defaultValue
+    }
+
     @Throws(Exception::class)
     fun SetField(field: Field, newValue: Any)
     {
@@ -37,14 +46,14 @@ object ReflectionUtility
         field.set(null, newValue)
     }
 
-    fun GetField(clazz: Class<*>, name: String): Field
+    fun GetField(clazz: Class<*>, name: String): Field?
     {
         try {
             val ret = clazz.getDeclaredField(name)
             ret.isAccessible = true
             return ret
         } catch (e: Exception) {
-            throw RuntimeException(e)
+            return null
         }
 
     }

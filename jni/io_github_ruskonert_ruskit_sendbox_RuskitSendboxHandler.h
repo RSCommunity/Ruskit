@@ -25,18 +25,10 @@ JNIEXPORT void JNICALL Java_io_github_ruskonert_ruskit_sendbox_RuskitSendboxHand
 
 /*
  * Class:     io_github_ruskonert_ruskit_sendbox_RuskitSendboxHandler
- * Method:    Test1
- * Signature: (I)V
- */
-JNIEXPORT void JNICALL Java_io_github_ruskonert_ruskit_sendbox_RuskitSendboxHandler_Test1
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     io_github_ruskonert_ruskit_sendbox_RuskitSendboxHandler
- * Method:    Test2
+ * Method:    PlaySoundA
  * Signature: ([B)V
  */
-JNIEXPORT void JNICALL Java_io_github_ruskonert_ruskit_sendbox_RuskitSendboxHandler_Test2
+JNIEXPORT void JNICALL Java_io_github_ruskonert_ruskit_sendbox_RuskitSendboxHandler_PlaySoundA
   (JNIEnv *, jclass, jbyteArray);
 
 #ifdef __cplusplus

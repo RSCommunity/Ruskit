@@ -3,6 +3,11 @@
 # Compiled class file
 *.class
 
+# JNI Test file
+*.dll
+*.so
+*.wav
+
 # Log file
 *.log
 

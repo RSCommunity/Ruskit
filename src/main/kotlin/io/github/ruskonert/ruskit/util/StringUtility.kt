@@ -78,7 +78,7 @@ object StringUtility
 
     private fun <E> toString(v : E) : String = v.toString()
 
-    /* Returns screen size from external library module. Not Implemented. */
+    /* Returns screen size from external libs module. Not Implemented. */
     private external fun getScreenResolutionSize0(): Nothing
 
     internal fun <R> valueAssert(x : R, func : (R) -> Any?) : Boolean =  func(x) as Boolean

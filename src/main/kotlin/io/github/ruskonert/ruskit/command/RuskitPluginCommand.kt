@@ -9,7 +9,7 @@ class RuskitPluginCommand : RuskitCommand<RuskitPluginCommand>("ruskit", "rusk",
     companion object
     {
         private val instance = RuskitPluginCommand()
-        //@JvmStatic fun getInstance() : RuskitPluginCommand = instance
+        @JvmStatic fun getInstance() : RuskitPluginCommand = instance
     }
 
     private val documentCommand : DocumentCommand = DocumentCommand()

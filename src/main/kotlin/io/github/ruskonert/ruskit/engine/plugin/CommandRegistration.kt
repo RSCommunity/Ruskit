@@ -36,7 +36,7 @@ class CommandRegistration : RuskitThread()
     companion object
     {
         private val instance : CommandRegistration = CommandRegistration()
-        //@JvmStatic fun getInstance() : CommandRegistration = instance
+        @JvmStatic fun getInstance() : CommandRegistration = instance
 
         private fun registerCommand()
         {
@@ -85,12 +85,12 @@ class CommandRegistration : RuskitThread()
         private val simpleCommandMap: SimpleCommandMap
             get() {
                 val server = Bukkit.getServer()
-                return ReflectionUtility.GetField(commandMapField, server)
+                return ReflectionUtility.GetField(commandMapField!!, server)
             }
 
         private fun getSimpleCommandMapRegistered(simpleCommandMap: SimpleCommandMap): HashMap<String, Command>
         {
-            return ReflectionUtility.GetField(simpleCommandField, simpleCommandMap)
+            return ReflectionUtility.GetField(simpleCommandField!!, simpleCommandMap)
         }
     }
 }

@@ -7,6 +7,7 @@ import io.github.ruskonert.ruskit.command.RuskitCommand
 import io.github.ruskonert.ruskit.component.Prefix
 import io.github.ruskonert.ruskit.engine.SustainableHandler
 import io.github.ruskonert.ruskit.exception.RuskitPluginException
+import io.github.ruskonert.ruskit.sendbox.RuskitSendboxHandler
 import io.github.ruskonert.ruskit.util.ReflectionUtility
 import io.github.ruskonert.ruskit.util.StringUtility
 
@@ -25,12 +26,17 @@ abstract class IntegratedPlugin : JavaPlugin(), Handle, RuskitServerPlugin {
 
     companion object {
         var CorePlugin: IntegratedPlugin? = null; private set
+
+        fun ClearWindowConsole() {
+            RuskitSendboxHandler.getInstance().call("ConsoleClear0")
+        }
     }
 
     private var registerHandlers: ConcurrentHashMap<SustainableHandler, Boolean> = ConcurrentHashMap()
     override fun getRegisterHandlers(): List<SustainableHandler> = this.registerHandlers.keys.toList()
 
-    fun getRunningRegisterHandlers(): List<SustainableHandler> {
+    fun getRunningRegisterHandlers(): List<SustainableHandler>
+    {
         if (this.registerHandlers.isEmpty()) return ArrayList()
         val list = ArrayList<SustainableHandler>()
         val registered = registerHandlers.keys.toList()
@@ -55,8 +61,9 @@ abstract class IntegratedPlugin : JavaPlugin(), Handle, RuskitServerPlugin {
         val field: Field? = ReflectionUtility.GetField(handle::class.java, "instance")
         if (field == null) {
             this.messageHandler!!.defaultMessage("No found at plugin hooker")
+            return
         }
-        ReflectionUtility.SetField(field!!, handle::class.java, this)
+        ReflectionUtility.SetField(field, handle::class.java, this)
         this.messageHandler!!.defaultMessage("Hooked plugin from Integrated Plugin Loader")
     }
 
@@ -82,16 +89,6 @@ abstract class IntegratedPlugin : JavaPlugin(), Handle, RuskitServerPlugin {
     open fun unload(handleInstance: Any?): Any? {
         // There's no planning to unload schedule
         return true
-    }
-
-    fun registerHandler(vararg handles: Class<*>) {
-        for (handle in handles) {
-            if (handle.isAssignableFrom(SustainableHandler::class.java)) {
-
-            } else if (handle.isAssignableFrom(RuskitCommand::class.java)) {
-
-            }
-        }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -148,7 +145,8 @@ abstract class IntegratedPlugin : JavaPlugin(), Handle, RuskitServerPlugin {
     }
 
 
-    fun reloadFinally() {
+    fun reloadFinally()
+    {
 
     }
 

@@ -28,10 +28,8 @@ import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.util.ArrayList
 
-abstract class TargetBuilder<E> protected constructor() : GenericInstance<TargetBuilder<E>>(), Handle
+abstract class TargetBuilder<E> protected constructor() : GenericInstance<TargetBuilder<E>>()
 {
-    var genericInstance: Any? = null; private set
-
     @Suppress("UNCHECKED_CAST")
     val genericType: Class<E> = (this.javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[0] as Class<E>
 
@@ -45,7 +43,7 @@ abstract class TargetBuilder<E> protected constructor() : GenericInstance<Target
 
     override fun onInit(handleInstance: Any?): Any
     {
-        this.genericInstance = handleInstance
+        super.onInit(handleInstance)
         for (field in this.genericInstance!!.javaClass.declaredFields)
         {
             field.isAccessible = true
