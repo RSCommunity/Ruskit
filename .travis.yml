@@ -10,4 +10,3 @@ env:
 script:
   - jdk_switcher use oraclejdk8
   - gcc -I$JAVA_HOME/include $JAVA_HOME/linux -o libRuskitSendboxHandler.so -shared -fPIC Ruskit.Test/RuskitSendboxHandler.cpp
-gi
