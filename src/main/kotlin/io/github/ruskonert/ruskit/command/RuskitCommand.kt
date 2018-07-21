@@ -29,11 +29,10 @@ import io.github.ruskonert.ruskit.platform.GenericInstance
 import io.github.ruskonert.ruskit.platform.code.NotImplemented
 import io.github.ruskonert.ruskit.plugin.IntegratedPlugin
 import io.github.ruskonert.ruskit.util.CommandUtility
-import io.github.ruskonert.ruskit.util.ReflectionUtility
 import io.github.ruskonert.ruskit.util.StringUtility
+
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import java.lang.reflect.Method
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -44,21 +43,31 @@ import kotlin.collections.HashMap
  * @param S The command class that inherited it
  * @see io.github.ruskonert.ruskit.command.RuskitCommand
  */
+@Suppress("DEPRECATION")
 abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitCommand<S>>, CommandExecutable, Activator<IntegratedPlugin?>
 {
-    constructor(command: String) { this.command = command }
-    constructor(command: String, vararg alias: String) : this(command) { this.addAlias(alias) }
+    constructor(command: String)
+    {
+        this.command = command
+    }
+    constructor(command: String, vararg alias: String) : this(command)
+    {
+        this.addAlias(alias)
+    }
 
     private var permissionMessage : FormatDescription? = FormatDescription()
     fun getPermissionMessage() : FormatDescription? = this.permissionMessage
     fun setPermissionMessage(fd : FormatDescription) { this.permissionMessage = fd }
     fun setPermissionMessage(s : String) { this.permissionMessage = FormatDescription(s) }
 
+    // PLEASE DO NOT REFLECT DIRECTLY THIS FIELD. IT WILL BE NULL.
+    // BECAUSE THIS VALUE INHERITED TO PARENT COMMAND. USE getPlugin() METHOD.
     private var handlePlugin : IntegratedPlugin? = null
     fun getPlugin() : IntegratedPlugin?
     {
         return if(this.handlePlugin == null) {
-            if(this.parent != null) this.parent!!.getPlugin()
+            if(this.parent != null)
+                this.parent!!.getPlugin()
             else null
         }
         else {
@@ -66,6 +75,7 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
         }
     }
 
+    @Deprecated("Command Activator is not implemented")
     override fun setEnabled(active: Boolean)
     {
         if(active)
@@ -79,38 +89,59 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
         }
     }
 
+    @Deprecated("Command Activator is not implemented")
     override fun setEnabled(handleInstance: IntegratedPlugin?)
     {
         this.handlePlugin = handleInstance
         this.setEnabled(handleInstance != null)
     }
 
+    @Deprecated("Command Activator is not implemented")
     override fun isEnabled(): Boolean
     {
         return ENTIRE_COMMANDS.contains(this)
     }
-
     companion object
     {
+        @Deprecated("Command Activator is not implemented")
         private val ENTIRE_COMMANDS : ArrayList<RuskitCommand<*>> = ArrayList()
+
+        @Deprecated("Command Activator is not implemented")
         private fun Register(c : RuskitCommand<*>) { ENTIRE_COMMANDS.add(c) }
+
+        @Deprecated("Command Activator is not implemented")
         @JvmStatic fun EntireCommand() : List<RuskitCommand<*>> = ENTIRE_COMMANDS
     }
 
-    open fun getCurrentCommand(target : CommandSender?, rawType : Boolean = false) : Any
+    fun getCurrentCommand(target: CommandSender? = null, itself: Boolean = true) : FormatDescription = this.getCurrentCommandBase(target, true, itself) as FormatDescription
+
+    fun getRawCurrentCommand(target : CommandSender? = null, itself : Boolean = true) : String = this.getCurrentCommandBase(target, false, itself) as String
+
+    protected open fun getCurrentCommandBase(target : CommandSender? = null, rawType : Boolean = false, itself: Boolean = true) : Any
     {
         try
         {
             if(target == null)
-                return this.getCurrentCommand(Bukkit.getConsoleSender(), rawType)
+                return this.getCurrentCommandBase(Bukkit.getConsoleSender(), rawType)
 
             val currentTreeCommand = FormatDescription("")
-            var tree: RuskitCommand<*>? = this
+            var tree: RuskitCommand<*>?
+            tree = if(itself)
+                this
+            else
+                this.getParentCommand()
+
             var treeIndex = 0
-            while (tree != null) {
+
+            while (tree != null)
+            {
+                // get relative permission value.
                 var permissionName = tree.getRelativePermission()!!.getPermissionName()
                 permissionName = if (target.hasPermission(permissionName)) "&a$permissionName" else "&4$permissionName"
 
+                // So, What is this code?
+                // If the user touched command sentence on chat, It will be show the message box.
+                // In other words, That's JSON Message.
                 val description = ArrayList<String>()
                 description.add("Another commands: ${tree.alias}")
                 description.add("Permission: $permissionName")
@@ -121,7 +152,10 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
                 tree = tree.getParentCommand()
             }
 
+            // remove trim.
             currentTreeCommand.format(currentTreeCommand.getFormat().trim())
+
+            // check raw type is true.
             return if (rawType)
                 currentTreeCommand.rawMessage()
             else
@@ -135,38 +169,49 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
         }
     }
 
-    open fun getDocumentCommand(handlePlugin : IntegratedPlugin? = this.getPlugin()) : RuskitCommand<*>?
+    open fun getDocumentCommand(handlePlugin : IntegratedPlugin? = this.getPlugin(), findPattern : String = "(help|document|\\?)") : RuskitCommand<*>?
     {
         for(c in this.getChildCommands())
         {
-            if(c is Document && c.command.matches(Regex("(help|document|\\?)")))
+            if(c is Document && c.command.matches(Regex(findPattern)))
                 return c
         }
         return null
     }
 
-    protected open fun executeDocument(target: CommandSender, handleInstance : RuskitCommand<*> = this) : Any?
+    protected open fun executeDocument(target: CommandSender, handleInstance : RuskitCommand<*>) : Any?
     {
-        this.getDocumentCommand()!!.perform(target, 0, ArrayList(), handleInstance)
-        return null
+        val document = this.getDocumentCommand()
+        return if(document == null)
+        {
+            this.getPlugin()!!.getMessageHandler().defaultMessage("&cSorry, There's no provided document or description.")
+            false
+        }
+        else
+        {
+            this.getDocumentCommand()!!.perform(target, 0, ArrayList(), handleInstance)
+        }
     }
 
 
     @Suppress("UNCHECKED_CAST")
-    fun execute(target: CommandSender, argv: ArrayList<String>, handleInstance : Any? = null) : Any?
+    internal fun execute(target: CommandSender, argv: ArrayList<String>, handleInstance : Any? = null) : Any?
     {
         // Get the current message handler.
         val messageHandler = this.getPlugin()!!.getMessageHandler()
 
         // Get current command & Add description.
-        val currentTreeCommand = this.getCurrentCommand(target) as FormatDescription
+        val currentTreeCommand = this.getCurrentCommand(target)
 
         // Check if the argument value exists.
         // If there is no argument value, it is very likely to recognize that the command is executed.
-        if (argv.isEmpty())
-        {
+        if (argv.isEmpty()) {
             val checksum = this.parameterBasicCheckResult(this.params, argv)
             when (checksum) {
+
+                // checksum = 0xFFFFFFFF -> require argument at least one.
+                // checksum = 0xFFFFFFFE -> parameter is empty, but sender tried to ether the arguments.
+                // The return value 0xFFFFFFFE doesn't exist this method, Because parameter is originally nothing.
                 -1 -> {
                     messageHandler.defaultMessage("&6It requires the arguments value at least.", target)
                     messageHandler.defaultMessage(StringUtility.WithIndex("&cRequired parameter:&f {0}", this.params[0].getName()), target)
@@ -174,42 +219,36 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
                     return false
                 }
                 else -> {
-                    // on this code, It maybe not executed because any command class have 1 parameter at least or more.
-                    // What I say is RuskitCommandBase was set require param -> [args]
+                    return if(RuskitCommandBase.IsCommandImplemented(this)) {
+                        var hInstance = handleInstance
+                        if(hInstance == null)
+                            hInstance = this
 
-                    // Verifies that the command help mode is enabled.
+                        val event = RuskitCommandEvent(target, this, argv, hInstance)
+                        event.run()
 
-                    // Help mode is disabled.
-                    // Then make sure that the perform function is implemented.
-                    val performMethod: Method = ReflectionUtility.MethodFromClass(this::class.java, "perform", onTargetOnly=true)!!
-
-                    // Help mode is disabled && perform is not implemented.
-                    // So what kind of work do you want to do?
-                    if(!ReflectionUtility.IsImplemented(performMethod))
-                    {
-                        return this.executeDocument(target)
-                        // throw CommandException("Perform is not implemented, usually isn't printing document page, want it?")
+                        if(! event.isCancelled)
+                            this.perform(event.sender,0, event.argv, event.handleInstance)
+                        else
+                            null
+                    } else {
+                        this.executeDocument(target, this)
                     }
-
-                    val event = RuskitCommandEvent(target, this, argv, handleInstance)
-                    event.run()
-
-                    if(! event.isCancelled)
-                        this.perform(event.sender,0, event.argv, event.handleInstance)
                 }
             }
         }
-
         // Separate the next command with the actual argument through the argument value.
-        else
-        {
+        else {
+
             // If there is at least one parameter value, it is necessary to distinguish the option value from the actual value.
             if(this.hasParameter())
             {
-                val m : HashMap<String, Any> = HashMap()
-
-                for((index, value) in argv.withIndex())
-                    m[this.params[index].getName()] = value
+                // What values in the HashMap variable?
+                // There are following pairs:
+                // Key -> Parameter name
+                // Value > The value of the parameter name
+                val argumentsMap : HashMap<String, Any> = HashMap()
+                for((index, value) in argv.withIndex()) argumentsMap[this.params[index].getName()] = value
 
                 when(this.parameterMode)
                 {
@@ -220,13 +259,7 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
                     }
 
                     Parameter.Base.PARAM_NAME_BASED -> {
-                        /*
-                        *                 -2 -> {
-                    messageHandler.defaultMessage("&6Exceeded the parameter value(s). No need value.", target)
-                    messageHandler.defaultMessage(StringUtility.WithIndex("&cExceeded from:&f {0}...", argv[0]), target)
-                    messageHandler.defaultMessage(StringUtility.WithIndex("&cNeed a Help? /{0} {1}", this.getCurrentCommand(target), "? | help"), target)
-                    return false
-                }*/
+
                         if(argv.size > this.params.size)
                         {
                             // Exceeded arguments size. You need change arguments type.
@@ -238,7 +271,7 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
 
                         for(param in params)
                         {
-                            if(param.isRequirement() && !m.containsKey(param.getName()))
+                            if(param.isRequirement() && !argumentsMap.containsKey(param.getName()))
                             {
                                 // required argument's value is missing.
                                 messageHandler.defaultMessage("required argument's value is missing.", target)
@@ -247,32 +280,32 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
                             }
                         }
 
-                        var handle : Any? = handleInstance
-                        if(handle == null)
-                            handle = this
+                        var hInstance : Any? = handleInstance
+                        if(hInstance == null) hInstance = this
 
-                        val event = RuskitCommandEvent(target, this, argv, handle)
+                        val event = RuskitCommandEvent(target, this, argv, hInstance)
                         event.run()
-                        if(! event.isCancelled)
-                            return this.perform(event.sender, argv.size, event.argv, event.handleInstance)
+                        return if(! event.isCancelled)
+                            this.perform(event.sender, argv.size, event.argv, event.handleInstance)
+                        else
+                            null
                     }
                 }
             }
-
             // The absence of a parameter to specify means to execute the command.
             // The first argument value will be the next command (or alias), and the second argument
             // value will be the argument value of the next command.
             else
             {
                 for(c in this.child)
-                    if(c.getCommand().equals(argv[0], true) || c.getAlias().contains(argv[0]))
-                    {
+                {
+                    // If finds the argument value equals one of child command or alias
+                    if (c.getCommand().equals(argv[0], true) || c.getAlias().contains(argv[0])) {
                         var hInstance = handleInstance
-                        if(hInstance == null)
-                            hInstance = this
-
+                        if (hInstance == null) hInstance = this
                         return c.execute(target, this.receiveArguments(argv), hInstance)
                     }
+                }
                 messageHandler.defaultMessage(StringUtility.WithIndex("&eUnknown command: {0}", currentTreeCommand.rawMessage()), target)
                 messageHandler.defaultMessage(StringUtility.WithIndex("&cNeed a Help? /{0} {1}", currentTreeCommand.rawMessage(), "? | help"), target)
                 return false
@@ -330,7 +363,8 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
 
     private fun parameterBasicCheckResult(p : ArrayList<Parameter>, argv: List<String>) : Int
     {
-        when(argv.size) {
+        when(argv.size)
+        {
             0 -> {
                 // require argument at least one.
                 if(p.isNotEmpty() && p[0].isRequirement()) return -1

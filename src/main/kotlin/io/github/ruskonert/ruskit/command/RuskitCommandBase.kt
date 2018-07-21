@@ -1,76 +1,94 @@
 package io.github.ruskonert.ruskit.command
 
-import io.github.ruskonert.ruskit.command.misc.Parameter
-import io.github.ruskonert.ruskit.command.plugin.document.CmdDetailCommand
-import io.github.ruskonert.ruskit.command.plugin.document.DocumentCommand
+import io.github.ruskonert.ruskit.command.plugin.DocumentCommand
 import io.github.ruskonert.ruskit.util.ReflectionUtility
+
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.PluginIdentifiableCommand
 import org.bukkit.plugin.Plugin
+
 import java.lang.reflect.Method
 import java.util.*
 
 open class RuskitCommandBase(name: String, command: RuskitCommand<*>) :
-        Command(name, command.getCommandDescription().getFormat(), command.getPermissionMessage()!!.rawMessage(), command.getAlias()), PluginIdentifiableCommand
-{
-    var ruskitCommand: RuskitCommand<*>
-        protected set
+        Command(name, command.getCommandDescription().getFormat(), command.getPermissionMessage()!!.rawMessage(), command.getAlias()), PluginIdentifiableCommand {
+
+    var basedRuskitCommand: RuskitCommand<*>; protected set
 
     init
     {
-        this.ruskitCommand = command
+        this.basedRuskitCommand = command
+        ConfigureDocument(this.basedRuskitCommand)
+        ConfigureFilter(this.basedRuskitCommand)
+    }
 
-        if(command.getChildCommands().isNotEmpty())
+    @Suppress("MemberVisibilityCanBePrivate", "FunctionName")
+        companion object
         {
-            this.additionalDocument(DocumentCommand())
-            if(!command.hasParameter() && !command.isRoot())
-            {
-                val defaultParameter = ArrayList<Parameter>()
-                defaultParameter.add(Parameter("args", true))
-                val parameterField = command::class.java.superclass.getDeclaredField("params")
-                ReflectionUtility.SetField(parameterField, command, defaultParameter)
+            fun IsCommandImplemented(ruskitCommand: RuskitCommand<*>): Boolean {
+                val performMethod: Method = ReflectionUtility.MethodFromClass(ruskitCommand::class.java, "perform", onTargetOnly = true)!!
+                return ReflectionUtility.IsImplemented(performMethod)
             }
-            this.defaultFilter()
-        }
-        else
-        {
-            this.additionalDocument(CmdDetailCommand())
-        }
-    }
 
-    open fun defaultFilter()
-    {
-        for(c in this.ruskitCommand.getChildCommands())
-        {
-            // Define default filters.
-            c.getCommandDescription().addFilter("plugin_name", ruskitCommand.getPlugin()!!.name)
-            c.getCommandDescription().addFilter("server_name", Bukkit.getServerName())
-            c.getCommandDescription().addFilter("server_time", Date().toString())
-        }
-    }
-
-    open fun additionalDocument(document : Document)
-    {
-        for(c in this.ruskitCommand.getChildCommands())
-        {
-            val performMethod: Method = ReflectionUtility.MethodFromClass(c::class.java, "perform", onTargetOnly=true)!!
-
-            if(!ReflectionUtility.IsImplemented(performMethod))
+            fun ConfigureFilter(ruskitCommand: RuskitCommand<*>)
             {
-                c.addChildCommands(document as RuskitCommand<*>)
+                if(ruskitCommand.getChildCommands().isNotEmpty())
+                {
+                    for(c in ruskitCommand.getChildCommands())
+                    {
+                        if(c.getChildCommands().isNotEmpty())
+                            ConfigureFilter(c)
+                    }
+                }
+                else
+                {
+                    // Define default filters.
+                    ruskitCommand.getCommandDescription().addFilter("plugin_name", ruskitCommand.getPlugin()!!.name)
+                    ruskitCommand.getCommandDescription().addFilter("server_name", Bukkit.getServerName())
+                    ruskitCommand.getCommandDescription().addFilter("server_time", Date().toString())
+                }
+            }
+
+            private fun ConfigureDocument(ruskitCommand: RuskitCommand<*>) {
+                if (ruskitCommand.getChildCommands().isNotEmpty()) {
+                    if (IsCommandImplemented(ruskitCommand)) {
+                        /// WARNING: this command class was implemented the perform, but has child command, Something wrong.
+                    }
+                    // Add document command. and check the child command has others.
+                    ruskitCommand.addChildCommands(DocumentCommand())
+
+                    // Add default parameter.
+                    // What it needs is show it available other commands.
+                    //val defaultParameter = ArrayList<Parameter>()
+                    //defaultParameter.add(Parameter("args", true))
+                    //val parameterField = command::class.java.superclass.getDeclaredField("params")
+                    //ReflectionUtility.SetField(parameterField, command, defaultParameter)
+
+                    for (child in ruskitCommand.getChildCommands())
+                        ConfigureDocument(child)
+
+                } else {
+                    if (IsCommandImplemented(ruskitCommand)) {
+                        /// Add command description command.
+                        // ruskitCommand.addChildCommands(CommandDetailDescriptor())
+                        // TODO()
+                    } else {
+                        // This command wasn't implemented command and hasn't child command.
+                        // In other word, It is unavailable command.
+                    }
+                }
             }
         }
-    }
 
     override fun getPlugin(): Plugin
     {
-        return this.ruskitCommand.getPlugin() as Plugin
+        return this.basedRuskitCommand.getPlugin() as Plugin
     }
 
     override fun execute(sender: CommandSender, commandLabel: String, args: Array<String>): Boolean
     {
-        return this.ruskitCommand.execute(sender, ArrayList(args.asList())) != null
+        return this.basedRuskitCommand.execute(sender, ArrayList(args.asList())) != null
     }
 }

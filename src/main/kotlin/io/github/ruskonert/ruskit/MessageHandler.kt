@@ -1,4 +1,6 @@
 @file:JvmName("MessageHandler")
+@file:Suppress("unused", "UNUSED_PARAMETER")
+
 package io.github.ruskonert.ruskit
 
 import io.github.ruskonert.ruskit.component.Prefix
@@ -106,12 +108,20 @@ open class MessageHandler
         sender!!.sendMessage(StringUtility.color(message))
     }
 
-    fun defaultMessage(str : String, target: CommandSender = this.sender!!, level : RuskitLogger.Level = RuskitLogger.Level.INFO) {
+    fun defaultMessage(str : String,
+                       target: CommandSender = this.sender!!,
+                       level : RuskitLogger.Level = RuskitLogger.Level.INFO) {
         this.sendTargetMessage(str, target, this.prefix != null, RuskitLogger.DefaultLogger, true, this.formatFilter, level)
     }
 
-    open fun sendTargetMessage(str : String, senderTarget : CommandSender, hasPrefix : Boolean = this.hasPrefix, logging : RuskitLogger? = null,
-                               colorable: Boolean = true, formatFilter : Map<String, String>? = this.formatFilter, level : RuskitLogger.Level = RuskitLogger.Level.INFO) {
+    open fun sendTargetMessage(str : String,
+                               senderTarget : CommandSender,
+                               hasPrefix : Boolean = this.hasPrefix,
+                               logging : RuskitLogger? = null,
+                               colorable: Boolean = true,
+                               formatFilter : Map<String, String>? = this.formatFilter,
+                               level : RuskitLogger.Level = RuskitLogger.Level.INFO) {
+
         var prefixMessage = if(hasPrefix) this.prefix!!.getNameWithAttach() + " " else ""
         var message = str
 

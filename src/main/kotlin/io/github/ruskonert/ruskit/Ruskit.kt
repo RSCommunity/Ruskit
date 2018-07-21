@@ -7,7 +7,6 @@ import io.github.ruskonert.ruskit.plugin.RuskitServerPlugin
 import io.github.ruskonert.ruskit.sendbox.RuskitSendboxHandler
 import java.io.ByteArrayOutputStream
 
-
 class Ruskit : IntegratedPlugin()
 {
     companion object {

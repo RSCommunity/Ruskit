@@ -209,27 +209,4 @@ object CommandUtility
             }
         }
     }
-
-    /**
-     * For test.
-     */
-    @JvmStatic
-    fun main(args : Array<String>)
-    {
-        val descriptionList = ArrayList<String>()
-        descriptionList.add("The command description")
-        descriptionList.add("It was showed by command utility")
-
-        val descriptionList2 = ArrayList<String>()
-        descriptionList2.add("If you want to more information or support:")
-        descriptionList2.add("https://github.com/ruskonert")
-
-        val formatDescription = FormatDescription("&6&lHello &8World, {0} -> &9&l&oThe &dmain command &efor {0}, &bCreated by {1}, &fAll rights reserved.")
-        formatDescription.setDescriptionSelector(0, "&dR&buskit",  descriptionList)
-        formatDescription.setDescriptionSelector(1, "Ruskonert",  descriptionList2)
-
-        val arrayComponent = this.toBaseComponent(formatDescription, false)
-        println(formatDescription.rawMessage())
-        println("done: " + arrayComponent.toString())
-    }
 }

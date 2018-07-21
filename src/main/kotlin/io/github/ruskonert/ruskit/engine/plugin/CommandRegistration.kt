@@ -2,7 +2,7 @@ package io.github.ruskonert.ruskit.engine.plugin
 
 import io.github.ruskonert.ruskit.command.RuskitCommand
 import io.github.ruskonert.ruskit.command.RuskitCommandBase
-import io.github.ruskonert.ruskit.command.plugin.document.DocumentCommand
+import io.github.ruskonert.ruskit.command.plugin.DocumentCommand
 import io.github.ruskonert.ruskit.engine.RuskitThread
 import io.github.ruskonert.ruskit.event.RuskitCommandEvent
 import io.github.ruskonert.ruskit.plugin.IntegratedPlugin
@@ -65,7 +65,7 @@ class CommandRegistration : RuskitThread()
 
                 val command = RuskitCommandBase(name, target)
 
-                val plugin = command.ruskitCommand.getPlugin()
+                val plugin = command.basedRuskitCommand.getPlugin()
                 val pluginName = if (plugin != null) plugin.name else "RuskitIntegratedPlugin"
                 commandMap.register(pluginName, command)
             }
@@ -76,7 +76,7 @@ class CommandRegistration : RuskitThread()
             if (command == null) return null
             if (command !is RuskitCommandBase) return null
             val cbc = command as RuskitCommandBase?
-            return cbc!!.ruskitCommand
+            return cbc!!.basedRuskitCommand
         }
 
         private var commandMapField = ReflectionUtility.GetField(Bukkit.getServer().javaClass, "commandMap")

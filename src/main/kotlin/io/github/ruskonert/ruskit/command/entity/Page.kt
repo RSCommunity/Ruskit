@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 typealias ComponentString = Array<BaseComponent>
 class Page : Executable<CommandSender>
 {
-    override fun execute(target: CommandSender, argv: ArrayList<String>)  : Any?
+    override fun execute(target: CommandSender, argv: ArrayList<String>) : Any?
     {
         val page = this.create()
         if(target is ConsoleCommandSender || target is Player)

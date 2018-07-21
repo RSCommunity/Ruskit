@@ -7,6 +7,8 @@
     <artifactId>Ruskit</artifactId>
     <version>1.0.0</version>
     <properties>
+        <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
         <kotlin.version>1.2.50</kotlin.version>
     </properties>
     <repositories>

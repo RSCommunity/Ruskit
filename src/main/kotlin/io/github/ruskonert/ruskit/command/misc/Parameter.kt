@@ -20,7 +20,7 @@ package io.github.ruskonert.ruskit.command.misc
 
 import io.github.ruskonert.ruskit.component.FormatDescription
 
-class Parameter(private var name : String, private var required : Boolean = false)
+open class Parameter(private var name : String, private var required : Boolean = false)
 {
     fun isRequirement() : Boolean = this.required
     fun getName() : String = this.name
@@ -29,6 +29,7 @@ class Parameter(private var name : String, private var required : Boolean = fals
     private var description : FormatDescription? = null
     fun getDescription() : FormatDescription? = this.description
     fun setDescription(paramDescription: FormatDescription) { this.description = paramDescription }
+
     enum class Base
     {
         ARGUMENTS_KEYWORD_BASED,
