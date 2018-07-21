@@ -1,4 +1,6 @@
 #pragma once
+
+#if defined(_WIN32)
 #pragma comment(lib, "dsound.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "winmm.lib")
@@ -52,3 +54,4 @@ namespace Ruskit
 		unsigned long dataSize;
 	};
 }
+#endif

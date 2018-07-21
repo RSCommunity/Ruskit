@@ -3,11 +3,19 @@
 #include <cstdlib>
 #include <fstream>
 
+#if defined(_WIN32)
 #include <windows.h>
+#pragma comment(lib, "Winmm.lib")
+#elif defined(__unix) || defined(__unix__) || defined(__linux__)
+#define <unistd.h>
+
+#elif defined(__APPLE__) || defined(__MACH__)
+#define <unistd.h>
+
+#endif
 
 #include "io_github_ruskonert_ruskit_sendbox_RuskitSendboxHandler.h"
 
-#pragma comment(lib, "Winmm.lib")
 using namespace std;
 
 JNIEXPORT void JNICALL Java_io_github_ruskonert_ruskit_sendbox_RuskitSendboxHandler_Test0(JNIEnv *env, jclass java_class, jstring java_string)
