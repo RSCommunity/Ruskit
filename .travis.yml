@@ -15,4 +15,4 @@ script:
   - mv $TRAVIS_BUILD_DIR/libRuskitSendboxHandler.so src/main/resources/
   - mvn install
 before_install:
-  - apt-get install binutils
+  - sudo apt-get install binutils
