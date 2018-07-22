@@ -30,9 +30,10 @@ import net.md_5.bungee.api.chat.HoverEvent
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
-class FormatDescription
+class FormatDescription : Cloneable
 {
     @Suppress("FunctionName")
     companion object
@@ -86,6 +87,33 @@ class FormatDescription
     private var filterData : HashMap<String, String> = HashMap()
     fun getFilter() : HashMap<String, String> = this.filterData
     fun addFilter(key : String, value : String) { this.filterData[key] = value }
+
+    public override fun clone(): Any {
+        return super.clone()
+    }
+
+    fun apply(clone : Boolean = false) : FormatDescription
+    {
+        val fDescription = if(clone) {
+            this.clone() as FormatDescription
+        }
+        else
+        {
+            this
+        }
+        for(k in fDescription.getFilter().keys)
+        {
+            val pattern = Pattern.compile("(\\{\\b$k})")
+            val match = pattern.matcher(fDescription.getFormat())
+            match.find()
+            if(match.groupCount() != 0)
+            {
+                val value : String = fDescription.getFilter()[k]!!
+                fDescription.setFormat(fDescription.getFormat().replace("\\{\\b$k}".toRegex(), value))
+            }
+        }
+        return fDescription
+    }
 
     constructor()
     {

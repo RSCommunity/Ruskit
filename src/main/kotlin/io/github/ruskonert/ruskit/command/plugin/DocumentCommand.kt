@@ -43,7 +43,7 @@ open class DocumentCommand : RuskitCommand<DocumentCommand>("help", "page", "?")
 
     init
     {
-        this.setCommandDescription("Show all {plugin_name}'s command description")
+        this.setCommandDescription("Show all command type: {parent_command} descriptions")
         this.setPermission("help")
         this.addParameter(Parameter("page", false))
         this.setDefaultOP(true)
@@ -62,6 +62,7 @@ open class DocumentCommand : RuskitCommand<DocumentCommand>("help", "page", "?")
     @Suppress("UNCHECKED_CAST")
     override fun output(listener: CommandSender, targetPage: Int, sizeOfLine: Int, rawType: Boolean, order: CommandOrder): Any?
     {
+        val command : RuskitCommand<*> = this.getParentCommand()!!
         val messageHandler = this.getPlugin()!!.getMessageHandler()
         if(targetPage < 0)
         {
@@ -72,8 +73,8 @@ open class DocumentCommand : RuskitCommand<DocumentCommand>("help", "page", "?")
         val commandList = ArrayList<RuskitCommand<*>>()
         val outputList = ArrayList<ComponentString>()
 
-        commandList.addAll(this.getChildCommands())
-        commandList.addAll(this.getExternalCommands())
+        commandList.addAll(command.getChildCommands())
+        commandList.addAll(command.getExternalCommands())
 
         if(commandList.size - 1 == 0)
         {
@@ -108,18 +109,18 @@ open class DocumentCommand : RuskitCommand<DocumentCommand>("help", "page", "?")
                     // Make a part description:
                     // &6/[currentCommand] [subCommand] : [Description]
                     val framework = ComponentBuilder("").append(CommandUtility.toBaseComponent(commandSlashHeader()) as ComponentString)
-                    val currentCommand = this.getCurrentCommand(listener)
+                    val currentCommand = value.getCurrentCommand(listener)
                     for((key, pairValue) in currentCommand.selectorList)
                         currentCommand.setDescriptionSelector(key, pairValue)
 
                     framework.append(CommandUtility.toBaseComponent(currentCommand) as ComponentString)
                     framework.append(" : ")
-                    framework.append(CommandUtility.toBaseComponent(this.getCommandDescription()) as ComponentString)
+                    framework.append(CommandUtility.toBaseComponent(value.getCommandDescription().apply()) as ComponentString)
                     outputList.add(framework.create())
                 }
             }
             is ConsoleCommandSender -> {
-                endRange = commandList.size - 1
+                endRange = commandList.size
                 for(value in commandList.subList(startRange, endRange))
                 {
                     var framework : String = commandSlashHeader().rawMessage()
@@ -127,7 +128,7 @@ open class DocumentCommand : RuskitCommand<DocumentCommand>("help", "page", "?")
                     // append a current command
                     framework += value.getRawCurrentCommand(listener)
                     framework += " : "
-                    framework += value.getCommandDescription().rawMessage()
+                    framework += value.getCommandDescription().apply().rawMessage()
                     outputList.add(CommandUtility.toBaseComponent(FormatDescription(framework)) as ComponentString)
                 }
             }

@@ -113,9 +113,9 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
         @JvmStatic fun EntireCommand() : List<RuskitCommand<*>> = ENTIRE_COMMANDS
     }
 
-    fun getCurrentCommand(target: CommandSender? = null, itself: Boolean = true) : FormatDescription = this.getCurrentCommandBase(target, true, itself) as FormatDescription
+    fun getCurrentCommand(target: CommandSender? = null, itself: Boolean = true) : FormatDescription = this.getCurrentCommandBase(target, false, itself) as FormatDescription
 
-    fun getRawCurrentCommand(target : CommandSender? = null, itself : Boolean = true) : String = this.getCurrentCommandBase(target, false, itself) as String
+    fun getRawCurrentCommand(target : CommandSender? = null, itself : Boolean = true) : String = this.getCurrentCommandBase(target, true, itself) as String
 
     protected open fun getCurrentCommandBase(target : CommandSender? = null, rawType : Boolean = false, itself: Boolean = true) : Any
     {

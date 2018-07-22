@@ -12,7 +12,6 @@ class RuskitPluginCommand : RuskitCommand<RuskitPluginCommand>("ruskit", "rusk",
         @JvmStatic fun getInstance() : RuskitPluginCommand = instance
     }
 
-    private val documentCommand : DocumentCommand = DocumentCommand()
     private val reloadCommand : ReloadCommand = ReloadCommand()
     private val updateCommand : UpdateCommand = UpdateCommand()
     private val policyCommand : PolicyCommand = PolicyCommand()
@@ -20,7 +19,7 @@ class RuskitPluginCommand : RuskitCommand<RuskitPluginCommand>("ruskit", "rusk",
     
     init
     {
-        this.addChildCommands(documentCommand, reloadCommand, updateCommand, policyCommand, pluginCommand)
+        this.addChildCommands(reloadCommand, updateCommand, policyCommand, pluginCommand)
         this.setPermission("ruskit")
     }
 }

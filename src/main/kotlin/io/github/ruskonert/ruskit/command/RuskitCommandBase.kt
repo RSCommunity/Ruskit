@@ -13,7 +13,11 @@ import java.lang.reflect.Method
 import java.util.*
 
 open class RuskitCommandBase(name: String, command: RuskitCommand<*>) :
-        Command(name, command.getCommandDescription().getFormat(), command.getPermissionMessage()!!.rawMessage(), command.getAlias()), PluginIdentifiableCommand {
+        Command(name,
+                command.getCommandDescription().apply().rawMessage(),
+                command.getPermissionMessage()!!.apply().rawMessage(),
+                command.getAlias()),
+        PluginIdentifiableCommand {
 
     var basedRuskitCommand: RuskitCommand<*>; protected set
 
@@ -34,24 +38,24 @@ open class RuskitCommandBase(name: String, command: RuskitCommand<*>) :
 
             fun ConfigureFilter(ruskitCommand: RuskitCommand<*>)
             {
+                ruskitCommand.getCommandDescription().addFilter("plugin_name", ruskitCommand.getPlugin()!!.name)
+                ruskitCommand.getCommandDescription().addFilter("server_name", Bukkit.getServerName())
+                ruskitCommand.getCommandDescription().addFilter("server_time", Date().toString())
+                ruskitCommand.getCommandDescription().addFilter("parent_command",
+                        ruskitCommand.getRawCurrentCommand(null, false).replace(" ",  "."))
                 if(ruskitCommand.getChildCommands().isNotEmpty())
                 {
                     for(c in ruskitCommand.getChildCommands())
                     {
-                        if(c.getChildCommands().isNotEmpty())
-                            ConfigureFilter(c)
+                        ConfigureFilter(c)
                     }
-                }
-                else
-                {
-                    // Define default filters.
-                    ruskitCommand.getCommandDescription().addFilter("plugin_name", ruskitCommand.getPlugin()!!.name)
-                    ruskitCommand.getCommandDescription().addFilter("server_name", Bukkit.getServerName())
-                    ruskitCommand.getCommandDescription().addFilter("server_time", Date().toString())
                 }
             }
 
             private fun ConfigureDocument(ruskitCommand: RuskitCommand<*>) {
+                if (ruskitCommand is Document)
+                    return
+
                 if (ruskitCommand.getChildCommands().isNotEmpty()) {
                     if (IsCommandImplemented(ruskitCommand)) {
                         /// WARNING: this command class was implemented the perform, but has child command, Something wrong.
