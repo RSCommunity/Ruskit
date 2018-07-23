@@ -10,7 +10,8 @@ import java.util.*
 abstract class AbstractEvent : Event(), Runnable, Cancellable
 {
     private var cancel: Boolean = false
-    private var customData: Map<Any, Any> = HashMap()
+    private var customData: HashMap<Any, Any> = HashMap()
+    fun getCustomData() : HashMap<Any, Any> = customData
 
     final override fun run()
     {
@@ -27,8 +28,15 @@ abstract class AbstractEvent : Event(), Runnable, Cancellable
         this.cancel = cancel
     }
 
-    fun setCustomData(m: Map<*, *>)
+    fun setCustomData(m: Map<Any, Any>)
     {
-        this.customData = m as Map<Any, Any>
+        this.customData = HashMap(m)
     }
+
+    fun insertCustomData(key : Any, value: Any)
+    {
+        this.customData[key] = value
+    }
+
+
 }

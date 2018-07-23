@@ -23,7 +23,7 @@ import io.github.ruskonert.ruskit.plugin.IntegratedPlugin
 import io.github.ruskonert.ruskit.util.RuskitLogger
 import org.bukkit.command.CommandSender
 
-class ReloadCommand : RuskitCommand<ReloadCommand>("reload")
+open class ReloadCommand : RuskitCommand<ReloadCommand>("reload")
 {
     init
     {

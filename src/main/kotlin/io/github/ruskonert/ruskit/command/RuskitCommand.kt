@@ -193,6 +193,27 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
         }
     }
 
+    internal fun hasPermission(target: CommandSender) : Boolean
+    {
+        val permission = this.getRelativePermission()!!
+        if(target.isOp)
+        {
+            if(!this.defaultOP)
+            {
+                return target.hasPermission(permission.getPermissionName())
+            }
+            return true
+        }
+        else
+        {
+            if(!this.defaultUser)
+            {
+                return target.hasPermission(permission.getPermissionName())
+            }
+            return true
+        }
+    }
+
 
     @Suppress("UNCHECKED_CAST")
     internal fun execute(target: CommandSender, argv: ArrayList<String>, handleInstance : Any? = null) : Any?
@@ -227,8 +248,14 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
                         val event = RuskitCommandEvent(target, this, argv, hInstance)
                         event.run()
 
-                        if(! event.isCancelled)
-                            this.perform(event.sender,0, event.argv, event.handleInstance)
+                        if(! event.isCancelled) {
+                            return if(this.hasPermission(target))
+                                this.perform(event.sender, 0, event.argv, event.handleInstance)
+                            else {
+                                messageHandler.defaultMessage(this.permissionMessage!!.apply().rawMessage(), target)
+                                false
+                            }
+                        }
                         else
                             null
                     } else {
@@ -286,7 +313,12 @@ abstract class RuskitCommand<S : RuskitCommand<S>> : GenericInstance<RuskitComma
                         val event = RuskitCommandEvent(target, this, argv, hInstance)
                         event.run()
                         return if(! event.isCancelled)
-                            this.perform(event.sender, argv.size, event.argv, event.handleInstance)
+                            return if(this.hasPermission(target))
+                                this.perform(event.sender, 0, event.argv, event.handleInstance)
+                            else {
+                                messageHandler.defaultMessage(this.permissionMessage!!.apply().rawMessage(), target)
+                                false
+                            }
                         else
                             null
                     }

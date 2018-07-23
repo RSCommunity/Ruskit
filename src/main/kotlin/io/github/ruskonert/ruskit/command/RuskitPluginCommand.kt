@@ -1,7 +1,8 @@
 package io.github.ruskonert.ruskit.command
 
-import io.github.ruskonert.ruskit.command.plugin.*
-import io.github.ruskonert.ruskit.command.plugin.DocumentCommand
+import io.github.ruskonert.ruskit.command.plugin.PluginCommand
+import io.github.ruskonert.ruskit.command.plugin.ReloadCommand
+import io.github.ruskonert.ruskit.command.plugin.UpdateCommand
 import io.github.ruskonert.ruskit.command.plugin.policy.PolicyCommand
 
 class RuskitPluginCommand : RuskitCommand<RuskitPluginCommand>("ruskit", "rusk", "rus")

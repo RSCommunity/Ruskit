@@ -21,7 +21,7 @@ package io.github.ruskonert.ruskit.command.plugin
 import io.github.ruskonert.ruskit.command.RuskitCommand
 import org.bukkit.command.CommandSender
 
-class UpdateCommand : RuskitCommand<UpdateCommand>("update")
+open class UpdateCommand : RuskitCommand<UpdateCommand>("update")
 {
     init
     {

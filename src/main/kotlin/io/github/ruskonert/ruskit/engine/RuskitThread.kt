@@ -23,8 +23,7 @@ abstract class RuskitThread : SustainableHandler(), Listener, Activator<Integrat
     var period : Long        = 0L;    protected set
     var isSync : Boolean     = true;  protected set
     var task   : BukkitTask? = null;  private set
-    val taskId : Int
-        get() = if (this.task == null) -1 else this.task!!.taskId
+    val taskId : Int get() = if (this.task == null) -1 else this.task!!.taskId
 
     var activePlugin: IntegratedPlugin? = null; private set
 

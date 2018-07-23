@@ -20,7 +20,7 @@ package io.github.ruskonert.ruskit.command.plugin
 
 import io.github.ruskonert.ruskit.command.RuskitCommand
 
-class StatusCommand : RuskitCommand<StatusCommand>("status", "stat")
+open class StatusCommand : RuskitCommand<StatusCommand>("status", "stat")
 {
     init
     {

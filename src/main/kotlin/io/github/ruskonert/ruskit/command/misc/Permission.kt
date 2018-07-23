@@ -18,7 +18,8 @@ SOFTWARE.
 */
 package io.github.ruskonert.ruskit.command.misc
 
-open class Permission(private var value: String, defaultOP: Boolean, defaultUser: Boolean)
+
+open class Permission(private var value: String, defaultOP: Boolean, defaultUser: Boolean) : org.bukkit.permissions.Permission(value)
 {
     fun getPermissionName() : String = this.value
     fun setPermissionName(value0 : String) { this.value = value0 }
