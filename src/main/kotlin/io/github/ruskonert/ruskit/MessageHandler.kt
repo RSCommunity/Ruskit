@@ -30,12 +30,21 @@ import org.bukkit.command.CommandSender
 open class MessageHandler
 {
     private var prefix : Prefix? = null
-
     private var hasPrefix : Boolean = false
-
     private var customFilter : HashMap<String, Any> = HashMap()
-
     private var formatFilter : HashMap<String, String> = HashMap()
+
+    fun sendConfigMessage(key : String) : String
+    {
+        return key
+    }
+
+    fun sendConfigMessage(key : String, who: CommandSender) : String
+    {
+        return key
+    }
+
+
 
     fun addFilter(sentence : String, replaced : String)
     {

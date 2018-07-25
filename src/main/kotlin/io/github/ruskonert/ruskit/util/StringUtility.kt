@@ -29,6 +29,13 @@ import java.util.regex.Pattern
 object StringUtility
 {
     fun color(str : String) : String = ChatColor.translateAlternateColorCodes('&', str)
+    fun color(str : MutableList<String>) : MutableList<String> {
+        for((index, st) in str.withIndex()) {
+            str[index] = this.color(st)
+        }
+        return str
+    }
+
     fun getScreenResolutionSize() : Dimension
     {
         val size : Dimension? =  Toolkit.getDefaultToolkit().screenSize

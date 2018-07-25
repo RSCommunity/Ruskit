@@ -1,9 +1,10 @@
-package io.github.ruskonert.ruskit.event
+package io.github.ruskonert.ruskit.event.config
 
 import io.github.ruskonert.ruskit.config.SynchronizeReader
+import io.github.ruskonert.ruskit.event.AbstractEvent
 import org.bukkit.event.HandlerList
 
-open class SynchronizeReaderEvent(var target: SynchronizeReader) : AbstractEvent()
+open class SynchronizeReaderEvent(var target: SynchronizeReader<*>) : AbstractEvent()
 {
     companion object { private val handler = HandlerList()
         @JvmStatic
@@ -11,6 +12,4 @@ open class SynchronizeReaderEvent(var target: SynchronizeReader) : AbstractEvent
     }
 
     override fun getHandlers(): HandlerList = handler
-
-
 }

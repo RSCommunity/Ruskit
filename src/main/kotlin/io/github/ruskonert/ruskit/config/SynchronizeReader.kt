@@ -2,20 +2,31 @@ package io.github.ruskonert.ruskit.config
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+
 import io.github.ruskonert.ruskit.engine.RuskitThread
-import io.github.ruskonert.ruskit.event.SynchronizeReaderEvent
+import io.github.ruskonert.ruskit.event.config.SynchronizeReaderEvent
 import io.github.ruskonert.ruskit.plugin.IntegratedPlugin
 import io.github.ruskonert.ruskit.util.Algorithm
 
 import java.io.File
 import java.security.NoSuchAlgorithmException
 
-abstract class SynchronizeReader(target: File) : RuskitThread()
+abstract class SynchronizeReader<E>(target: File) : RuskitThread()
 {
+    @Volatile
+    private var gsonObject : Gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
+
     companion object
     {
-        private val hREADER : Multimap<IntegratedPlugin, SynchronizeReader> = ArrayListMultimap.create()
-        @Synchronized fun RegisterHandledReader() : Multimap<IntegratedPlugin, SynchronizeReader> = hREADER
+        private val hREADER : Multimap<IntegratedPlugin, SynchronizeReader<*>> = ArrayListMultimap.create()
+        @Synchronized fun RegisterHandledReader() : Multimap<IntegratedPlugin, SynchronizeReader<*>> = hREADER
+    }
+
+    open fun getEntity(element : Any) : E?
+    {
+        return null
     }
 
     private var file: File? = target
@@ -26,15 +37,22 @@ abstract class SynchronizeReader(target: File) : RuskitThread()
     {
         try
         {
-            if(this.lastHash != "") {
-                val hash = Algorithm.getSHA256file(file!!.path)!!
-                if(lastHash != hash)
+            if(this.lastHash != "")
+            {
+                if(file != null && file!!.exists()) {
+                    val hash = Algorithm.getSHA256file(file!!.path)!!
+                    if (lastHash != hash) {
+                        val readerEvent = SynchronizeReaderEvent(this)
+                        readerEvent.insertCustomData("lastHash", this.lastHash)
+                        this.lastHash = hash
+                        if (!readerEvent.isCancelled) {
+                            readerEvent.run()
+                        }
+                    }
+                }
+                else
                 {
-                    val readerEvent = SynchronizeReaderEvent(this)
-                    readerEvent.insertCustomData("lastHash", this.lastHash)
-                    this.lastHash = hash
-                    if(! readerEvent.isCancelled)
-                        readerEvent.run()
+
                 }
             }
             else
@@ -44,8 +62,6 @@ abstract class SynchronizeReader(target: File) : RuskitThread()
         catch (e : NoSuchAlgorithmException) { }
         return true
     }
-
-    abstract fun verify(data : Any) : Boolean
 
     override fun isEnabled(): Boolean
     {
@@ -77,6 +93,5 @@ abstract class SynchronizeReader(target: File) : RuskitThread()
     override fun setEnabled(handleInstance: IntegratedPlugin?)
     {
         super.setEnabled(handleInstance)
-        this.setEnabled(super.activePlugin != null)
     }
 }

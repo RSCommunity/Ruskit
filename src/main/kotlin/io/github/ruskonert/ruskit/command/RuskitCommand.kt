@@ -23,7 +23,7 @@ import io.github.ruskonert.ruskit.command.misc.CommandOrder
 import io.github.ruskonert.ruskit.command.misc.Parameter
 import io.github.ruskonert.ruskit.command.misc.Permission
 import io.github.ruskonert.ruskit.component.FormatDescription
-import io.github.ruskonert.ruskit.event.RuskitCommandEvent
+import io.github.ruskonert.ruskit.event.command.RuskitCommandEvent
 import io.github.ruskonert.ruskit.exception.PermissionPolicyException
 import io.github.ruskonert.ruskit.platform.GenericInstance
 import io.github.ruskonert.ruskit.platform.code.NotImplemented

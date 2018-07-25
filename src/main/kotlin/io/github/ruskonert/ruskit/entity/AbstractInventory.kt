@@ -1,5 +1,6 @@
 package io.github.ruskonert.ruskit.entity
 
+import io.github.ruskonert.ruskit.entity.inventory.AbstractInventoryBase
 import io.github.ruskonert.ruskit.entity.inventory.InventoryComponent
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -7,13 +8,16 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import java.util.*
 
-abstract class AbstractInventory : SerializableEntity
+abstract class AbstractInventory : SerializableEntity<AbstractInventory>, AbstractInventoryBase
 {
     private constructor() : super(UUID.randomUUID().toString())
 
     protected constructor(inventoryName: String) : super(inventoryName)
+    {
+        this.customizationName = inventoryName
+    }
 
-    open fun initialize(tableRows: Int, inventoryName: String, clickSound: SoundEffect?, owner: Player? = null) {
+    protected open fun initialize(tableRows: Int, inventoryName: String = this.customizationName, clickSound: SoundEffect? = null, owner: Player? = null) {
         AbstractInventory.initialize(this, tableRows, inventoryName, clickSound, owner)
     }
 
@@ -26,7 +30,8 @@ abstract class AbstractInventory : SerializableEntity
                        owner: Player? = null) : AbstractInventory {
             val targetObject : AbstractInventory = entity
             for (i in 0..tableRows * 9) {
-                targetObject.slotComponents[i] = null
+                val component = InventoryComponent()
+                targetObject.slotComponents[i] = component
                 targetObject.soundEffects[i] = clickSound }
             targetObject.owner = owner
             targetObject.inventoryBase = Bukkit.createInventory(owner, tableRows * 9, inventoryName)
@@ -42,6 +47,8 @@ abstract class AbstractInventory : SerializableEntity
     fun getOwner() : InventoryHolder? = this.owner!!
 
     private var inventoryBase : Inventory? = null
+    override fun getInventoryBase() : Inventory? = this.inventoryBase
+
     private var customizationName : String = "Custom Inventory"
     fun getInventoryName() = this.customizationName
 
@@ -50,7 +57,8 @@ abstract class AbstractInventory : SerializableEntity
     fun hasSoundEffects(slot : Int) : Boolean = this.soundEffects[slot] != null
 
     private val slotComponents : HashMap<Int, InventoryComponent?> = HashMap()
-    fun getSlotComponents() : HashMap<Int, InventoryComponent?> = this.slotComponents
+    override fun getSlotComponents() : Map<Int, InventoryComponent?> = this.slotComponents
+
     fun setComponent(slot : Int, component: InventoryComponent) {
         this.slotComponents[slot] = component
     }

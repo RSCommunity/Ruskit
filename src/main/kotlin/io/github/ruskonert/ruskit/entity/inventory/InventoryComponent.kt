@@ -1,25 +1,49 @@
 package io.github.ruskonert.ruskit.entity.inventory
 
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonSerializationContext
+import com.google.gson.*
 import io.github.ruskonert.ruskit.component.JsonCompatibleSerializer
+import io.github.ruskonert.ruskit.util.StringUtility
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.material.MaterialData
 import java.lang.reflect.Type
 
 open class InventoryComponent : JsonCompatibleSerializer<InventoryComponent>()
 {
-    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): InventoryComponent {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): InventoryComponent
+    {
+        val jsonObject = json as JsonObject
+        val icObject = InventoryComponent()
+        icObject.material = Material.getMaterial(jsonObject.get("value").asString)
+        if(jsonObject.get("amount") == null)
+            icObject.amount = 1
+        else
+            icObject.amount = jsonObject.get("amount").asInt
+
+        if(jsonObject.get("damage") == null)
+            icObject.damaged = 0
+        else
+            icObject.damaged = jsonObject.get("damage").asShort
+
+        icObject.itemStack = ItemStack(icObject.material, icObject.amount, icObject.damaged)
+        return icObject
     }
 
     override fun serialize(src: InventoryComponent?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement
     {
-        var jsonObject = JsonObject()
+        val jsonObject = JsonObject()
+        val materialObject = JsonObject()
+        val descriptionArray = JsonArray()
+        materialObject.addProperty("value", this.material.toString())
+        materialObject.addProperty("glow", this.isGlow)
+        materialObject.addProperty("amount", this.amount)
+        materialObject.addProperty("name", this.materialName)
+
+        for(desc in this.description)
+            descriptionArray.add(desc)
+        materialObject.add("description", descriptionArray)
+        jsonObject.add("material", materialObject)
+        return jsonObject
     }
 
     private var material : Material = Material.GRASS
@@ -29,6 +53,10 @@ open class InventoryComponent : JsonCompatibleSerializer<InventoryComponent>()
     private var meterialData : Byte = 0
 
     private var materialName : String = "Default"
+    fun setMaterialName(name : String) {
+        this.materialName = name
+        this.itemStack.itemMeta.displayName = StringUtility.color(name)
+    }
 
     private var amount : Int = 1
     fun setAmount(value : Int) {
@@ -37,20 +65,27 @@ open class InventoryComponent : JsonCompatibleSerializer<InventoryComponent>()
     }
 
     private var damaged : Short = 0
-    fun setDamage(value : Short) {
+    fun setDamage(value : Short)
+    {
         this.damaged = value
-        this.itemStack.durability = damaged
+        this.itemStack.durability = (this.itemStack.durability - damaged).toShort()
     }
 
-    private val itemStack : ItemStack = ItemStack(material, amount, damaged)
+    private var itemStack : ItemStack = ItemStack(material, amount, damaged)
 
     @Synchronized
-    fun toItemStack() : ItemStack = itemStack
+    fun toItemStack() : ItemStack {
+        if(isGlow)
+        {
 
+        }
+        return itemStack
+    }
 
     private val description: ArrayList<String> = ArrayList()
-    fun setDescription(index : Int, decsription : String) {
-        this.description[index] = decsription
+    fun setDescription(index : Int, description : String) {
+        this.description[index] = description
+        this.itemStack.itemMeta.lore = StringUtility.color(this.description)
     }
 
     private var hoverFunction : ((Player) -> Boolean)? = null
@@ -58,15 +93,9 @@ open class InventoryComponent : JsonCompatibleSerializer<InventoryComponent>()
 
     private var clickFunction : ((Player) -> Boolean)? = null
     fun setClick(function : (Player) -> Boolean) { this.clickFunction = function }
-    /*
-    fun toItemStack() : ItemStack
-    {
-        val itemStack = ItemStack(material, amount, damaged)
-        val meta = itemStack.itemMeta
-        meta.displayName = materialName
-        meta.lore = this.description
-        itemStack.itemMeta = meta
-        return itemStack
+    fun getClickFunction() : ((Player) -> Boolean)? = this.clickFunction
+
+    companion object {
+        fun getSlot(x : Int, y: Int) : Int = (x-1) + (9 * (y - 1))
     }
-    */
 }
